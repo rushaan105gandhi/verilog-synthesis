@@ -1,0 +1,3 @@
+E:/synthesis/build/CMakeFiles/synthesis.dir
+E:/synthesis/build/CMakeFiles/edit_cache.dir
+E:/synthesis/build/CMakeFiles/rebuild_cache.dir
