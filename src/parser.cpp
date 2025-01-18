@@ -104,22 +104,24 @@ std::shared_ptr<ASTNode> Parser::parsePortList() {
     return portListNode;
 }
 
+
 std::shared_ptr<ASTNode> Parser::parseAssign() {
     advance(); //consume 'assign'
     auto assignNode = std::make_shared<ASTNode>(ASTNodeType::Assign, "assign");
 
     if (currentToken().type == TokenType::Identifier) {
          assignNode->children.push_back(parseIdentifier());
+    } else {
+        throw std::runtime_error("Expected an identifier as the output of the assignment");
     }
 
     if (currentToken().value != "=") {
         throw std::runtime_error("Expected '=' in assignment");
     }
-    advance(); //consume '='
+    advance(); 
 
-    if (currentToken().type == TokenType::Identifier) {
-        assignNode->children.push_back(parseIdentifier());
-    }
+    //parse the expression on the right hand side
+    assignNode->children.push_back(parseExpression());
 
     return assignNode;
 }
@@ -129,6 +131,25 @@ std::shared_ptr<ASTNode> Parser::parseIdentifier() {
         throw std::runtime_error("Expected Identifier");
     }
     auto identifierNode = std::make_shared<ASTNode>(ASTNodeType::Identifier, currentToken().value);
-    advance(); //consume identifier
+    advance(); 
     return identifierNode;
+}
+
+std::shared_ptr<ASTNode> Parser::parseExpression() {
+    auto leftOperand = parseIdentifier(); 
+
+    //check for logical operator
+    if (currentToken().type == TokenType::Operator) {
+        auto operatorNode = std::make_shared<ASTNode>(ASTNodeType::Operator, currentToken().value);
+        advance(); 
+
+        auto rightOperand = parseIdentifier();
+        
+        operatorNode->children.push_back(leftOperand);
+        operatorNode->children.push_back(rightOperand);
+
+        return operatorNode;
+    }
+
+    return leftOperand;
 }

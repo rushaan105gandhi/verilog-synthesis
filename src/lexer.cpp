@@ -33,7 +33,7 @@ Token Lexer::tokenizeKeywordOrIdentifier() {
     std::string value = source.substr(start, position - start);
 
     //simple keyword check:
-    if (value == "module" || value == "endmodule" || value == "input" || value == "output") {
+    if (value == "module" || value == "endmodule" || value == "input" || value == "output" || value == "assign") {
         return {TokenType::Keyword, value, line, column};
     }
     return {TokenType::Identifier, value, line, column};
@@ -50,7 +50,24 @@ Token Lexer::tokenizeNumber() {
 
 Token Lexer::tokenizeSymbol() {
     char symbol = currentChar();
+
+    //Handle multi-character symbols (e.g., &&, ||)
+    if ((symbol == '&' || symbol == '|') && source[position + 1] == symbol) {
+        std::string op = std::string(1, symbol) + std::string(1, source[position + 1]);
+        advance();
+        advance();
+        return {TokenType::Operator, op, line, column};
+    }
     advance();
+
+    //Handle single-character symbols
+    if (symbol == '=') {
+        return {TokenType::Equals, "=", line, column};
+    }
+    if (symbol == '&' || symbol == '|') {
+        return {TokenType::Operator, std::string(1, symbol), line, column};
+    }
+
     return {TokenType::Symbol, std::string(1, symbol), line, column};
 }
 
@@ -70,11 +87,6 @@ std::vector<Token> Lexer::tokenize() {
     }
     return tokens;
 }
-
-
-
-
-
 
 
 
